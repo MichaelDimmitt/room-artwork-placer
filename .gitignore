@@ -1,0 +1,43 @@
+# Images - prevent accidental commits of photos
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+*.bmp
+*.tiff
+*.tif
+
+# Input and output directories (contents only, keep .gitkeep)
+input/**/*
+!input/**/.gitkeep
+results/**/*
+!results/.gitkeep
+
+# Generated analysis files
+rooms_analysis.json
+artwork_analysis.json
+placement_plan.json
+placement_report.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
