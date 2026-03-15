@@ -53,6 +53,28 @@ The pipeline uses Claude Vision to analyze room photos and artwork images, then 
 
 ## Modules
 
+### 0. generate_gallery.py
+
+**Purpose:** Create a side-by-side gallery composite of all artwork pieces.
+
+**Input:** Directory of artwork images (`input/artwork/`)
+
+**Output:** `results/gallery.jpg`
+
+**Key features:**
+- **True to size**: No scaling or resizing of artwork
+- Each piece maintains original dimensions
+- Vertically centered on a neutral background
+- Configurable padding between pieces
+
+**CLI usage:**
+```bash
+python generate_gallery.py
+python generate_gallery.py --input input/artwork --output results/gallery.jpg --padding 40
+```
+
+---
+
 ### 1. analyze_rooms.py
 
 **Purpose:** Extract wall zones and room characteristics from apartment photos.

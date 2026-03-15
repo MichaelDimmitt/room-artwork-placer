@@ -2,7 +2,7 @@
 
 ## REQ-001: Artwork Gallery Generation
 
-**Status:** Planned
+**Status:** Implemented (`generate_gallery.py`)
 
 **Description:**
 Generate a gallery composite image showing all artwork pieces side by side for visual reference before wall placement.
@@ -29,7 +29,7 @@ Provide a visual overview of the full collection as it would appear in reality, 
 
 ## REQ-002: Gitignore for Photos
 
-**Status:** Planned
+**Status:** Implemented (`.gitignore`)
 
 **Description:**
 Add `.gitignore` rules to prevent image files from being committed to the repository.

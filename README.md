@@ -17,21 +17,44 @@ Set your Anthropic API key:
 export ANTHROPIC_API_KEY=your_key_here
 ```
 
+## Project Structure
+
+```
+room-artwork-placer/
+├── input/
+│   ├── apartment/     # Room photos go here
+│   └── artwork/       # Artwork photos go here
+├── results/           # Generated composites and gallery
+├── docs/
+│   ├── ARCHITECTURE.md
+│   └── REQUIREMENTS.md
+└── *.py               # Pipeline modules
+```
+
 ## Usage
 
 ```bash
-# 1. Drop your photos into the right folders
-mkdir -p input/apartment input/artwork results
+# 1. Add your photos to the input folders
+#    input/apartment/  - room photos
+#    input/artwork/    - artwork photos
 
-# 2. Run the full pipeline
+# 2. Generate a gallery preview of your artwork collection
+python generate_gallery.py
+
+# 3. Run the full placement pipeline
 python run_pipeline.py
 
-# 3. View results in /results folder + placement_report.md
+# 4. View results in /results folder + placement_report.md
 ```
 
-## Pipeline Steps
-1. `analyze_rooms.py`   — Claude Vision reads each room, outputs wall zones as JSON
-2. `analyze_art.py`     — Claude Vision reads each artwork, outputs style/color/size JSON  
-3. `match_and_place.py` — Scores and matches artworks to walls
-4. `composite.py`       — OpenCV warps + ImageMagick blends artwork onto walls
-5. `run_pipeline.py`    — Orchestrates all steps end-to-end
+## Modules
+
+| Module | Description |
+|--------|-------------|
+| `generate_gallery.py` | Create side-by-side gallery of artwork (true to size) |
+| `analyze_rooms.py` | Claude Vision extracts wall zones from room photos |
+| `analyze_art.py` | Claude Vision analyzes artwork style/color/mood |
+| `match_and_place.py` | Score and match artworks to walls |
+| `composite.py` | OpenCV warps + blends artwork onto walls |
+| `generate_report.py` | Generate Markdown placement report |
+| `run_pipeline.py` | Orchestrate full pipeline end-to-end |
