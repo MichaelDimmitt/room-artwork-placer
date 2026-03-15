@@ -2,6 +2,8 @@
 
 Digitally composite artwork onto apartment photos using Claude Vision + OpenCV + ImageMagick.
 
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed design documentation.
+
 ## Setup
 
 ```bash
