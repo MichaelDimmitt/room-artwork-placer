@@ -10,7 +10,10 @@ import os
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
 from PIL import Image
+
+load_dotenv()
 
 
 def encode_image(image_path: str) -> tuple[str, str]:
@@ -29,11 +32,20 @@ def encode_image(image_path: str) -> tuple[str, str]:
 
 
 EXTRACTION_PROMPT = """
-Analyze this image and identify ALL paintings, artwork, or framed pictures visible.
+Analyze this image and identify ALL paintings, artwork, framed pictures, or canvases visible.
 
-For EACH piece of artwork found, provide:
-1. Bounding box coordinates (top_left and bottom_right as [x, y] pixel coordinates)
-2. A size reference - estimate the artwork's real-world dimensions based on context clues in the image (furniture, doors, people, frames, etc.)
+CRITICAL INSTRUCTIONS:
+- The image may be ROTATED 90 degrees. Look at the entire image carefully.
+- Include the FULL FRAME/BORDER of each artwork in your bounding box - do NOT crop tight to just the painted area.
+- For framed pieces: the bounding box should include the outer edge of the frame.
+- For unframed canvases: include the full canvas edge.
+- Count EVERY piece of art, even if partially obscured or stacked.
+- Some images have 8+ artworks - make sure you find them ALL.
+
+For EACH piece of artwork found, provide bounding box coordinates as [x, y] where:
+- x is pixels from LEFT edge of image
+- y is pixels from TOP edge of image
+- top_left_px must have SMALLER x and y values than bottom_right_px
 
 Return ONLY a valid JSON object (no markdown, no explanation):
 
@@ -54,7 +66,7 @@ Return ONLY a valid JSON object (no markdown, no explanation):
   ]
 }
 
-Be precise with pixel coordinates. If no artwork is found, return {"artworks": []}.
+Be VERY precise with pixel coordinates. Double-check that top_left has smaller values than bottom_right.
 """
 
 
@@ -68,7 +80,7 @@ def detect_artworks(image_path: str, client: anthropic.Anthropic) -> dict:
     img_data, media_type = encode_image(image_path)
 
     message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-opus-4-20250514",
         max_tokens=2000,
         messages=[
             {

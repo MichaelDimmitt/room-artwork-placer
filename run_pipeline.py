@@ -12,6 +12,10 @@ import os
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def check_dependencies():
     """Verify required packages and tools are installed."""

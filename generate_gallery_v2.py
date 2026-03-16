@@ -92,7 +92,7 @@ def generate_gallery_v2(
 
 def run(
     detections_file: str = "results/artwork_detections.json",
-    output_file: str = "results/gallery_v2.jpg",
+    output_file: str = "results/gallery_v3.jpg",
     pixels_per_inch: float = 10.0,
     padding: int = 30,
 ):
@@ -139,7 +139,7 @@ def main():
     )
     parser.add_argument(
         "--output", "-o",
-        default="results/gallery_v2.jpg",
+        default="results/gallery_v3.jpg",
         help="Output path for gallery image"
     )
     parser.add_argument(

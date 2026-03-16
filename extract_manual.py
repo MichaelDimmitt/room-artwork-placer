@@ -17,16 +17,17 @@ from PIL import Image
 # x increases left to right, y increases top to bottom
 
 DETECTIONS = {
-    # Photo 1: Single framed owl print on white wall (shot straight on, slight angle)
-    "20260315_152038.jpg": {
+    # Owl portrait - single framed print on white wall (4000x3000) - STRAIGHT ON
+    # This one is correct already
+    "owl_portrait_and_frame.jpg": {
         "image_width": 4000,
         "image_height": 3000,
         "artworks": [
             {
                 "id": "owls_print",
                 "description": "Framed print of owls on pine branches with brown/tan mat and gold frame",
-                "top_left_px": [1005, 475],
-                "bottom_right_px": [2595, 2045],
+                "top_left_px": [970, 440],
+                "bottom_right_px": [2640, 2100],
                 "estimated_real_width_inches": 16,
                 "estimated_real_height_inches": 20,
                 "size_reference": "Standard framed print with wide mat",
@@ -34,17 +35,34 @@ DETECTIONS = {
             }
         ]
     },
-    # Photo 2: Three pieces - rotated 90 degrees CCW (wood panel left, chains bottom, expressionist right)
-    # When viewing: wood panel is on left side, chains canvas horizontal in middle-bottom, framed piece upper right
-    "20260315_152052.jpg": {
+    # Wave painting - rotated 90 CCW (4000x3000)
+    # Frame left edge ~880, right edge ~2780, top ~530, bottom ~2150
+    "1painting_with_frame.jpg": {
+        "image_width": 4000,
+        "image_height": 3000,
+        "artworks": [
+            {
+                "id": "wave_lines",
+                "description": "Blue and white abstract with flowing contour lines - thin gold frame",
+                "top_left_px": [880, 530],
+                "bottom_right_px": [2780, 2150],
+                "estimated_real_width_inches": 30,
+                "estimated_real_height_inches": 24,
+                "size_reference": "Large piece above desk",
+                "confidence": "high"
+            }
+        ]
+    },
+    # 3 paintings - rotated 90 CCW (4000x3000)
+    "3paintings_2_with_frames.jpg": {
         "image_width": 4000,
         "image_height": 3000,
         "artworks": [
             {
                 "id": "wood_cityscape",
                 "description": "Wood-burned cityscape panel with buildings and figures",
-                "top_left_px": [85, 620],
-                "bottom_right_px": [1320, 2180],
+                "top_left_px": [50, 400],
+                "bottom_right_px": [1400, 2450],
                 "estimated_real_width_inches": 18,
                 "estimated_real_height_inches": 24,
                 "size_reference": "Wood panel, approximately 18x24 inches",
@@ -53,8 +71,8 @@ DETECTIONS = {
             {
                 "id": "colorful_chains",
                 "description": "Interlocking circles/Olympic rings style on white canvas",
-                "top_left_px": [1320, 1520],
-                "bottom_right_px": [2620, 2180],
+                "top_left_px": [1380, 1350],
+                "bottom_right_px": [2850, 2450],
                 "estimated_real_width_inches": 36,
                 "estimated_real_height_inches": 12,
                 "size_reference": "Wide horizontal canvas, about 36x12 inches",
@@ -63,8 +81,8 @@ DETECTIONS = {
             {
                 "id": "abstract_expressionist",
                 "description": "Abstract expressionist painting - blues, yellows, grays in silver frame",
-                "top_left_px": [2420, 420],
-                "bottom_right_px": [3350, 1350],
+                "top_left_px": [2350, 200],
+                "bottom_right_px": [3550, 1450],
                 "estimated_real_width_inches": 14,
                 "estimated_real_height_inches": 14,
                 "size_reference": "Square format in frame, approximately 14x14 inches",
@@ -72,17 +90,16 @@ DETECTIONS = {
             }
         ]
     },
-    # Photo 3: Four pieces - image is 4000x3000
-    # As displayed: gray doves bottom-left, woman in yellow bottom-right, city print middle-right, blue moon top-right
-    "20260315_152101.jpg": {
+    # 4 paintings - rotated 90 CCW (4000x3000)
+    "4paintings_with_frames.jpg": {
         "image_width": 4000,
         "image_height": 3000,
         "artworks": [
             {
                 "id": "gray_doves",
                 "description": "Abstract white doves/birds on gray background - thin gold frame - ON WALL",
-                "top_left_px": [318, 1948],
-                "bottom_right_px": [1328, 2878],
+                "top_left_px": [150, 1700],
+                "bottom_right_px": [1450, 3000],
                 "estimated_real_width_inches": 30,
                 "estimated_real_height_inches": 24,
                 "size_reference": "Large horizontal piece on wall, about 30x24 inches",
@@ -91,8 +108,8 @@ DETECTIONS = {
             {
                 "id": "woman_yellow_field",
                 "description": "Woman in blue dress reclining in yellow flower field - gold frame - LEANING",
-                "top_left_px": [2555, 2048],
-                "bottom_right_px": [3325, 2820],
+                "top_left_px": [2350, 1800],
+                "bottom_right_px": [3450, 2950],
                 "estimated_real_width_inches": 18,
                 "estimated_real_height_inches": 14,
                 "size_reference": "Medium painting in ornate gold frame",
@@ -101,8 +118,8 @@ DETECTIONS = {
             {
                 "id": "city_rooftops_print",
                 "description": "Colorful city rooftops print - white mat, black frame - LEANING",
-                "top_left_px": [2908, 1468],
-                "bottom_right_px": [3508, 2028],
+                "top_left_px": [2700, 1150],
+                "bottom_right_px": [3700, 2000],
                 "estimated_real_width_inches": 12,
                 "estimated_real_height_inches": 10,
                 "size_reference": "Small framed print with mat",
@@ -111,8 +128,8 @@ DETECTIONS = {
             {
                 "id": "blue_moonlit_scene",
                 "description": "Blue moonlit night scene - small gold frame - ON WALL TOP",
-                "top_left_px": [3048, 688],
-                "bottom_right_px": [3648, 1048],
+                "top_left_px": [2900, 500],
+                "bottom_right_px": [3800, 1200],
                 "estimated_real_width_inches": 12,
                 "estimated_real_height_inches": 8,
                 "size_reference": "Small horizontal piece",
@@ -120,43 +137,26 @@ DETECTIONS = {
             }
         ]
     },
-    # Photo 4: Single wave lines painting - rotated 90 degrees CCW
-    "20260315_152108.jpg": {
-        "image_width": 4000,
-        "image_height": 3000,
-        "artworks": [
-            {
-                "id": "wave_lines",
-                "description": "Blue and white abstract with flowing contour lines - thin gold frame",
-                "top_left_px": [1020, 580],
-                "bottom_right_px": [2600, 2020],
-                "estimated_real_width_inches": 30,
-                "estimated_real_height_inches": 24,
-                "size_reference": "Large piece, compared to desk chair about 30x24 inches",
-                "confidence": "high"
-            }
-        ]
-    },
-    # Photo 5: Multiple stacked paintings - shot straight on (2334x1556)
-    "photo1.jpg": {
+    # 8+ paintings stacked - STRAIGHT ON (2334x1556)
+    "8_pantings_with_frame_and1paintings_without_frame.jpg": {
         "image_width": 2334,
         "image_height": 1556,
         "artworks": [
             {
                 "id": "abstract_orange_black",
-                "description": "Large abstract - orange, black, white expressionist canvas - LEFT CENTER",
-                "top_left_px": [285, 510],
-                "bottom_right_px": [978, 855],
+                "description": "Large abstract - orange, black, white expressionist canvas",
+                "top_left_px": [200, 250],
+                "bottom_right_px": [1030, 950],
                 "estimated_real_width_inches": 40,
-                "estimated_real_height_inches": 24,
-                "size_reference": "Largest piece in photo, approximately 40x24 inches",
+                "estimated_real_height_inches": 30,
+                "size_reference": "Largest piece in photo",
                 "confidence": "high"
             },
             {
                 "id": "woman_portrait",
-                "description": "Portrait of woman looking over shoulder - warm earth tones - FAR LEFT BOTTOM",
-                "top_left_px": [0, 555],
-                "bottom_right_px": [175, 1020],
+                "description": "Portrait of woman looking over shoulder - warm earth tones - FAR LEFT",
+                "top_left_px": [0, 440],
+                "bottom_right_px": [230, 1100],
                 "estimated_real_width_inches": 12,
                 "estimated_real_height_inches": 18,
                 "size_reference": "Small portrait canvas",
@@ -165,8 +165,8 @@ DETECTIONS = {
             {
                 "id": "red_organic_shapes",
                 "description": "Red/orange organic curved shapes on white background - TOP CENTER",
-                "top_left_px": [958, 82],
-                "bottom_right_px": [1195, 545],
+                "top_left_px": [950, 20],
+                "bottom_right_px": [1220, 600],
                 "estimated_real_width_inches": 14,
                 "estimated_real_height_inches": 20,
                 "size_reference": "Medium vertical canvas",
@@ -174,19 +174,19 @@ DETECTIONS = {
             },
             {
                 "id": "geometric_sailboats",
-                "description": "Geometric abstract with red triangles/sailboats - black frame - leaning in front",
-                "top_left_px": [918, 758],
-                "bottom_right_px": [1168, 1205],
+                "description": "Geometric abstract with red triangles/sailboats - black frame",
+                "top_left_px": [870, 680],
+                "bottom_right_px": [1200, 1300],
                 "estimated_real_width_inches": 16,
                 "estimated_real_height_inches": 20,
                 "size_reference": "Medium framed piece",
                 "confidence": "high"
             },
             {
-                "id": "blue_mountain_landscape",
-                "description": "Blue mountain/waterfall Asian style landscape - two panels - FAR RIGHT TOP",
-                "top_left_px": [1452, 42],
-                "bottom_right_px": [1875, 605],
+                "id": "blue_mountain_diptych",
+                "description": "Blue mountain/waterfall Asian style - TWO PANELS",
+                "top_left_px": [1430, 0],
+                "bottom_right_px": [1920, 640],
                 "estimated_real_width_inches": 24,
                 "estimated_real_height_inches": 32,
                 "size_reference": "Vertical diptych panels",
@@ -195,8 +195,8 @@ DETECTIONS = {
             {
                 "id": "horse_drawing",
                 "description": "Horse sketch in black frame - CENTER",
-                "top_left_px": [1182, 515],
-                "bottom_right_px": [1382, 902],
+                "top_left_px": [1160, 440],
+                "bottom_right_px": [1420, 960],
                 "estimated_real_width_inches": 10,
                 "estimated_real_height_inches": 14,
                 "size_reference": "Small framed sketch",
@@ -205,8 +205,8 @@ DETECTIONS = {
             {
                 "id": "yellow_venice_scene",
                 "description": "Yellow/ochre cityscape - Venice scene - RIGHT BOTTOM",
-                "top_left_px": [1275, 715],
-                "bottom_right_px": [1672, 1152],
+                "top_left_px": [1200, 660],
+                "bottom_right_px": [1730, 1210],
                 "estimated_real_width_inches": 18,
                 "estimated_real_height_inches": 18,
                 "size_reference": "Square format canvas",
@@ -214,9 +214,9 @@ DETECTIONS = {
             },
             {
                 "id": "sunflower_simple",
-                "description": "Simple line drawing of daisy/sunflower - CENTER RIGHT",
-                "top_left_px": [1372, 422],
-                "bottom_right_px": [1545, 732],
+                "description": "Simple line drawing of daisy/sunflower with hand",
+                "top_left_px": [1340, 360],
+                "bottom_right_px": [1600, 800],
                 "estimated_real_width_inches": 8,
                 "estimated_real_height_inches": 12,
                 "size_reference": "Small framed print",
