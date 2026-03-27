@@ -72,6 +72,31 @@ def check_input_folders(apartment_dir: str, artwork_dir: str):
         print(f"✓ {name}: {len(images)} image(s) in {folder}")
 
 
+def check_for_new_artwork(artwork_dir: str, coords_file: str = "results/interactive_coords.json"):
+    """Check if there are new artwork images that need interactive picking."""
+    import json
+    valid_exts = {".jpg", ".jpeg", ".png", ".webp"}
+
+    artwork_path = Path(artwork_dir)
+    all_images = {f.name for f in artwork_path.iterdir() if f.suffix.lower() in valid_exts}
+
+    # Load existing coordinates
+    processed_images = set()
+    if os.path.exists(coords_file):
+        with open(coords_file) as f:
+            coords_data = json.load(f)
+            processed_images = set(coords_data.keys())
+
+    new_images = all_images - processed_images
+    return new_images
+
+
+def run_interactive_picker():
+    """Run the interactive picker for new artwork."""
+    from interactive_picker import main as picker_main
+    picker_main()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Art Placement Pipeline")
     parser.add_argument("--apartment", default="input/apartment", help="Apartment photos folder")
@@ -86,6 +111,16 @@ def main():
     print("\nChecking setup...")
     check_dependencies()
     check_input_folders(args.apartment, args.artwork)
+
+    # ── Step 0: Check for new artwork needing interactive picking ──
+    new_artwork = check_for_new_artwork(args.artwork)
+    if new_artwork:
+        print(f"\n🖼️  Found {len(new_artwork)} new artwork image(s) needing selection:")
+        for img in sorted(new_artwork):
+            print(f"     • {img}")
+        print("\n  Launching interactive picker...")
+        print("  (Select artwork regions, then press 's' to save, 'q' to quit)\n")
+        run_interactive_picker()
 
     # ── Step 1: Analyze rooms ──────────────────────────────────
     from analyze_rooms import run as analyze_rooms
