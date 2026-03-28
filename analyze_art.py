@@ -28,6 +28,15 @@ def encode_image(image_path: str) -> tuple[str, str]:
 ARTWORK_ANALYSIS_PROMPT = """
 You are an expert art curator and interior designer analyzing an artwork image.
 
+IMPORTANT: Estimate the REAL-WORLD physical dimensions of this artwork in inches.
+Use these cues to estimate size:
+- Standard frame sizes (8x10, 11x14, 16x20, 18x24, 24x36, 30x40, etc.)
+- Frame thickness and proportions relative to the artwork
+- Canvas depth if visible
+- Mat board width if present
+- Any visible reference objects
+- Typical sizes for the medium/style (e.g., miniatures are 2-6", large oils are 24-48"+)
+
 Analyze this artwork and return ONLY a valid JSON object (no markdown, no explanation):
 
 {
@@ -38,6 +47,10 @@ Analyze this artwork and return ONLY a valid JSON object (no markdown, no explan
   "color_temperature": "warm | cool | neutral | mixed",
   "mood": "calm | energetic | melancholic | joyful | dramatic | mysterious | romantic | playful",
   "visual_weight": "light | medium | heavy",
+  "estimated_width_inches": 18,
+  "estimated_height_inches": 24,
+  "size_confidence": "low | medium | high",
+  "size_reasoning": "Brief explanation of how you estimated the size",
   "estimated_aspect_ratio": "portrait | landscape | square",
   "recommended_room_types": ["living room", "bedroom"],
   "recommended_wall_styles": ["modern", "minimalist"],

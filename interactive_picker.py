@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """
-Interactive tool to select artwork bounding boxes by clicking corners.
+Interactive tool to select artwork quadrilaterals by clicking 4 corners.
 
 Usage:
     python interactive_picker.py
 
 Instructions:
     1. Click on the TOP-LEFT corner of a painting
-    2. Click on the BOTTOM-RIGHT corner of the same painting
-    3. A rectangle will be drawn - press 'y' to confirm, 'n' to redo
-    4. Press 's' to save and move to next image
-    5. Press 'q' to quit and save all progress
-    6. Press 'u' to undo last selection
-    7. Press 'r' to reset all selections for current image
+    2. Click on the TOP-RIGHT corner
+    3. Click on the BOTTOM-RIGHT corner
+    4. Click on the BOTTOM-LEFT corner
+    5. A quadrilateral will be drawn - press 'y' to confirm, 'n' to redo
+    6. Press 's' to save and move to next image
+    7. Press 'q' to quit and save all progress
+    8. Press 'u' to undo last selection
+    9. Press 'r' to reset all selections for current image
 """
 
 import os
@@ -31,52 +33,72 @@ clicks = []
 current_boxes = []
 current_image = None
 display_image = None
+help_panel = None
+combined_display = None
 window_name = "Artwork Picker - Click corners"
 
 
+def update_display():
+    """Update the combined display with image and help panel."""
+    global display_image, help_panel, combined_display
+    if help_panel is not None and display_image is not None:
+        combined_display = np.hstack([display_image, help_panel])
+        cv2.imshow(window_name, combined_display)
+
+
 def mouse_callback(event, x, y, flags, param):
-    """Handle mouse clicks to define bounding boxes."""
+    """Handle mouse clicks to define quadrilaterals with 4 corners."""
     global clicks, current_boxes, display_image, current_image
 
     if event == cv2.EVENT_LBUTTONDOWN:
-        clicks.append((x, y))
+        if len(clicks) < 4:
+            clicks.append((x, y))
 
         # Draw click point
         display_image = current_image.copy()
 
-        # Draw existing boxes
-        for box in current_boxes:
-            cv2.rectangle(display_image, box[0], box[1], (0, 255, 0), 3)
-            # Add box number
-            idx = current_boxes.index(box) + 1
-            cv2.putText(display_image, str(idx), (box[0][0] + 5, box[0][1] + 25),
+        # Draw existing quads
+        for quad in current_boxes:
+            pts = np.array(quad, np.int32).reshape((-1, 1, 2))
+            cv2.polylines(display_image, [pts], True, (0, 255, 0), 3)
+            # Add quad number
+            idx = current_boxes.index(quad) + 1
+            cv2.putText(display_image, str(idx), (quad[0][0] + 5, quad[0][1] + 25),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
-        # Draw current clicks
+        # Draw current clicks with different colors for each corner
+        corner_colors = [(255, 0, 0), (0, 165, 255), (0, 0, 255), (255, 0, 255)]  # Blue, Orange, Red, Magenta
+        corner_labels = ["TL", "TR", "BR", "BL"]
         for i, click in enumerate(clicks):
-            color = (255, 0, 0) if i == 0 else (0, 0, 255)
-            cv2.circle(display_image, click, 8, color, -1)
+            cv2.circle(display_image, click, 8, corner_colors[i], -1)
+            cv2.putText(display_image, corner_labels[i], (click[0] + 10, click[1] + 5),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, corner_colors[i], 2)
 
-        # If we have 2 clicks, draw the box
-        if len(clicks) == 2:
-            pt1 = (min(clicks[0][0], clicks[1][0]), min(clicks[0][1], clicks[1][1]))
-            pt2 = (max(clicks[0][0], clicks[1][0]), max(clicks[0][1], clicks[1][1]))
-            cv2.rectangle(display_image, pt1, pt2, (0, 255, 255), 3)
+        # Draw lines between clicks
+        if len(clicks) >= 2:
+            for i in range(len(clicks) - 1):
+                cv2.line(display_image, clicks[i], clicks[i + 1], (0, 255, 255), 2)
 
-        cv2.imshow(window_name, display_image)
+        # If we have 4 clicks, close the quadrilateral
+        if len(clicks) == 4:
+            pts = np.array(clicks, np.int32).reshape((-1, 1, 2))
+            cv2.polylines(display_image, [pts], True, (0, 255, 255), 3)
+
+        update_display()
 
 
 def draw_boxes():
-    """Redraw all confirmed boxes on the image."""
+    """Redraw all confirmed quadrilaterals on the image."""
     global display_image, current_image, current_boxes
 
     display_image = current_image.copy()
-    for i, box in enumerate(current_boxes):
-        cv2.rectangle(display_image, box[0], box[1], (0, 255, 0), 3)
-        cv2.putText(display_image, str(i + 1), (box[0][0] + 5, box[0][1] + 25),
+    for i, quad in enumerate(current_boxes):
+        pts = np.array(quad, np.int32).reshape((-1, 1, 2))
+        cv2.polylines(display_image, [pts], True, (0, 255, 0), 3)
+        cv2.putText(display_image, str(i + 1), (quad[0][0] + 5, quad[0][1] + 25),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
-    cv2.imshow(window_name, display_image)
+    update_display()
 
 
 def resize_for_display(image, max_width=1100, max_height=900):
@@ -105,21 +127,20 @@ def create_help_panel(height):
     instructions = [
         "",
         "1. Click TOP-LEFT corner",
-        "   of a painting",
+        "2. Click TOP-RIGHT corner",
+        "3. Click BOTTOM-RIGHT corner",
+        "4. Click BOTTOM-LEFT corner",
         "",
-        "2. Click BOTTOM-RIGHT corner",
-        "   of the same painting",
-        "",
-        "3. Yellow box appears:",
+        "5. Yellow quad appears:",
         "   Press 'y' to confirm",
         "   Press 'n' to redo",
         "",
-        "4. Repeat for all paintings",
+        "6. Repeat for all paintings",
         "",
-        "5. Press 's' to save and",
+        "7. Press 's' to save and",
         "   go to next image",
         "",
-        "6. Press 'q' to quit",
+        "8. Press 'q' to quit",
         "   (progress is saved)",
     ]
 
@@ -159,22 +180,34 @@ def create_help_panel(height):
 
     y_pos += 30
     cv2.circle(panel, (30, y_pos), 8, (255, 0, 0), -1)
-    cv2.putText(panel, "= First click (top-left)", (50, y_pos + 5),
+    cv2.putText(panel, "TL = Top-left (1st)", (50, y_pos + 5),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.45, (200, 200, 200), 1)
+
+    y_pos += 25
+    cv2.circle(panel, (30, y_pos), 8, (0, 165, 255), -1)
+    cv2.putText(panel, "TR = Top-right (2nd)", (50, y_pos + 5),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.45, (200, 200, 200), 1)
 
     y_pos += 25
     cv2.circle(panel, (30, y_pos), 8, (0, 0, 255), -1)
-    cv2.putText(panel, "= Second click (bottom-right)", (50, y_pos + 5),
+    cv2.putText(panel, "BR = Bottom-right (3rd)", (50, y_pos + 5),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.45, (200, 200, 200), 1)
 
     y_pos += 25
-    cv2.rectangle(panel, (22, y_pos - 8), (38, y_pos + 8), (0, 255, 255), 2)
-    cv2.putText(panel, "= Pending selection", (50, y_pos + 5),
+    cv2.circle(panel, (30, y_pos), 8, (255, 0, 255), -1)
+    cv2.putText(panel, "BL = Bottom-left (4th)", (50, y_pos + 5),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.45, (200, 200, 200), 1)
 
     y_pos += 25
-    cv2.rectangle(panel, (22, y_pos - 8), (38, y_pos + 8), (0, 255, 0), 2)
-    cv2.putText(panel, "= Confirmed box", (50, y_pos + 5),
+    pts = np.array([(22, y_pos - 6), (38, y_pos - 8), (40, y_pos + 6), (20, y_pos + 8)], np.int32)
+    cv2.polylines(panel, [pts.reshape((-1, 1, 2))], True, (0, 255, 255), 2)
+    cv2.putText(panel, "= Pending quad", (50, y_pos + 5),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.45, (200, 200, 200), 1)
+
+    y_pos += 25
+    pts = np.array([(22, y_pos - 6), (38, y_pos - 8), (40, y_pos + 6), (20, y_pos + 8)], np.int32)
+    cv2.polylines(panel, [pts.reshape((-1, 1, 2))], True, (0, 255, 0), 2)
+    cv2.putText(panel, "= Confirmed quad", (50, y_pos + 5),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.45, (200, 200, 200), 1)
 
     return panel
@@ -182,7 +215,7 @@ def create_help_panel(height):
 
 def process_image(image_path, existing_boxes=None):
     """Process a single image interactively."""
-    global clicks, current_boxes, current_image, display_image
+    global clicks, current_boxes, current_image, display_image, help_panel
 
     # Load image
     original = cv2.imread(str(image_path))
@@ -194,13 +227,25 @@ def process_image(image_path, existing_boxes=None):
     current_image, scale = resize_for_display(original)
     display_image = current_image.copy()
 
-    # Convert existing boxes to display scale
+    # Create help panel matching image height
+    help_panel = create_help_panel(current_image.shape[0])
+
+    # Convert existing quads to display scale
     current_boxes = []
     if existing_boxes:
-        for box in existing_boxes:
-            pt1 = (int(box[0][0] * scale), int(box[0][1] * scale))
-            pt2 = (int(box[1][0] * scale), int(box[1][1] * scale))
-            current_boxes.append((pt1, pt2))
+        for quad in existing_boxes:
+            if len(quad) == 4:
+                # 4-corner format
+                scaled_quad = [(int(pt[0] * scale), int(pt[1] * scale)) for pt in quad]
+                current_boxes.append(scaled_quad)
+            elif len(quad) == 2:
+                # Legacy 2-corner format - convert to 4 corners
+                pt1, pt2 = quad
+                tl = (int(pt1[0] * scale), int(pt1[1] * scale))
+                tr = (int(pt2[0] * scale), int(pt1[1] * scale))
+                br = (int(pt2[0] * scale), int(pt2[1] * scale))
+                bl = (int(pt1[0] * scale), int(pt2[1] * scale))
+                current_boxes.append([tl, tr, br, bl])
 
     clicks = []
 
@@ -211,11 +256,11 @@ def process_image(image_path, existing_boxes=None):
     print(f"\n  Processing: {image_path.name}")
     print(f"  Scale: {scale:.2f}x (original: {original.shape[1]}x{original.shape[0]})")
     print("  Controls:")
-    print("    Click: Select corners (top-left, then bottom-right)")
-    print("    y: Confirm current box")
-    print("    n: Cancel current box")
-    print("    u: Undo last confirmed box")
-    print("    r: Reset all boxes for this image")
+    print("    Click: Select 4 corners (TL -> TR -> BR -> BL)")
+    print("    y: Confirm current quadrilateral")
+    print("    n: Cancel current selection")
+    print("    u: Undo last confirmed quad")
+    print("    r: Reset all quads for this image")
     print("    s: Save and go to next image")
     print("    q: Quit and save all")
 
@@ -224,13 +269,12 @@ def process_image(image_path, existing_boxes=None):
     while True:
         key = cv2.waitKey(1) & 0xFF
 
-        if key == ord('y') and len(clicks) == 2:
-            # Confirm box
-            pt1 = (min(clicks[0][0], clicks[1][0]), min(clicks[0][1], clicks[1][1]))
-            pt2 = (max(clicks[0][0], clicks[1][0]), max(clicks[0][1], clicks[1][1]))
-            current_boxes.append((pt1, pt2))
+        if key == ord('y') and len(clicks) == 4:
+            # Confirm quadrilateral (store as list of 4 corner tuples)
+            quad = [clicks[0], clicks[1], clicks[2], clicks[3]]
+            current_boxes.append(quad)
             clicks = []
-            print(f"    Box {len(current_boxes)} confirmed: {pt1} -> {pt2}")
+            print(f"    Quad {len(current_boxes)} confirmed: {quad}")
             draw_boxes()
 
         elif key == ord('n'):
@@ -257,10 +301,9 @@ def process_image(image_path, existing_boxes=None):
             # Save and continue
             # Convert back to original scale
             original_boxes = []
-            for box in current_boxes:
-                pt1 = (int(box[0][0] / scale), int(box[0][1] / scale))
-                pt2 = (int(box[1][0] / scale), int(box[1][1] / scale))
-                original_boxes.append((pt1, pt2))
+            for quad in current_boxes:
+                scaled_quad = [(int(pt[0] / scale), int(pt[1] / scale)) for pt in quad]
+                original_boxes.append(scaled_quad)
             cv2.destroyAllWindows()
             return original_boxes
 
@@ -271,7 +314,7 @@ def process_image(image_path, existing_boxes=None):
 
 
 def extract_artworks(coords_data):
-    """Extract artwork images based on saved coordinates."""
+    """Extract artwork images based on saved coordinates using perspective transform."""
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     extracted_artworks = []
@@ -287,11 +330,41 @@ def extract_artworks(coords_data):
         boxes = data.get('boxes', [])
 
         for i, box in enumerate(boxes):
-            x1, y1 = box[0]
-            x2, y2 = box[1]
+            if len(box) == 4:
+                # 4-corner format - use perspective transform
+                src_pts = np.array(box, dtype=np.float32)
 
-            # Extract region
-            extracted = image[y1:y2, x1:x2]
+                # Calculate output dimensions from the quadrilateral
+                width_top = np.linalg.norm(np.array(box[1]) - np.array(box[0]))
+                width_bottom = np.linalg.norm(np.array(box[2]) - np.array(box[3]))
+                height_left = np.linalg.norm(np.array(box[3]) - np.array(box[0]))
+                height_right = np.linalg.norm(np.array(box[2]) - np.array(box[1]))
+
+                out_width = int(max(width_top, width_bottom))
+                out_height = int(max(height_left, height_right))
+
+                # Destination points for a rectangle
+                dst_pts = np.array([
+                    [0, 0],
+                    [out_width - 1, 0],
+                    [out_width - 1, out_height - 1],
+                    [0, out_height - 1]
+                ], dtype=np.float32)
+
+                # Compute perspective transform and apply
+                matrix = cv2.getPerspectiveTransform(src_pts, dst_pts)
+                extracted = cv2.warpPerspective(image, matrix, (out_width, out_height))
+
+            elif len(box) == 2:
+                # Legacy 2-corner format - simple crop
+                x1, y1 = box[0]
+                x2, y2 = box[1]
+                extracted = image[y1:y2, x1:x2]
+                out_width = x2 - x1
+                out_height = y2 - y1
+            else:
+                print(f"  Warning: Invalid box format for {filename}")
+                continue
 
             # Save
             artwork_id = f"art_{i+1}"
@@ -307,9 +380,9 @@ def extract_artworks(coords_data):
                 "extracted_file": output_path,
                 "extracted_width_px": extracted.shape[1],
                 "extracted_height_px": extracted.shape[0],
-                "estimated_real_width_inches": 18,
-                "estimated_real_height_inches": 14,
-                "confidence": "high"
+                "estimated_real_width_inches": None,
+                "estimated_real_height_inches": None,
+                "size_needs_analysis": True
             })
             total += 1
 
@@ -345,8 +418,13 @@ def main():
         # Convert existing format if needed
         existing_boxes = []
         for box in existing:
-            if isinstance(box, (list, tuple)) and len(box) == 2:
-                existing_boxes.append((tuple(box[0]), tuple(box[1])))
+            if isinstance(box, (list, tuple)):
+                if len(box) == 4:
+                    # 4-corner format
+                    existing_boxes.append([tuple(pt) for pt in box])
+                elif len(box) == 2:
+                    # Legacy 2-corner format
+                    existing_boxes.append([tuple(box[0]), tuple(box[1])])
 
         result = process_image(img_path, existing_boxes)
 
